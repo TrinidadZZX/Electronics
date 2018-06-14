@@ -151,32 +151,27 @@
         <Ww>
           <count>0</count>
           <WinNumber>1</WinNumber>
-          <ItemText>TxCounter,0x0A</ItemText>
+          <ItemText>RxCounter,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>1</count>
           <WinNumber>1</WinNumber>
-          <ItemText>TxCount,0x0A</ItemText>
+          <ItemText>mode</ItemText>
         </Ww>
         <Ww>
           <count>2</count>
           <WinNumber>1</WinNumber>
-          <ItemText>TxCounter</ItemText>
+          <ItemText>RGB</ItemText>
         </Ww>
         <Ww>
           <count>3</count>
           <WinNumber>1</WinNumber>
-          <ItemText>TxBuffer[TxCounter]</ItemText>
+          <ItemText>threshold,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>4</count>
           <WinNumber>1</WinNumber>
-          <ItemText>TxBuffer</ItemText>
-        </Ww>
-        <Ww>
-          <count>5</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>*Str</ItemText>
+          <ItemText>readChar</ItemText>
         </Ww>
       </WatchWindow1>
       <Tracepoint>
