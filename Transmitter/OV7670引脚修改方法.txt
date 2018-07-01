@@ -1,0 +1,30 @@
+工程中采用寄存器配置引脚
+
+
+数据口 D0-D7
+1. 在ov7670.c中使能相应的IO端口
+2. 在ov7670.c中设置相应端口为输入方式
+
+
+
+控制口
+	RRST： 	PA4
+	WRST：	PA8
+	RCLK：	PA9
+	OE：	PA11
+	WEN：	PA12
+	VSYNC：	PA15
+
+1. 在ov7670.c中使能相应的IO端口
+2. 在ov7670.c中设置相应端口的输入输出方式
+	输出：RRST，OE，WEN，WRST，RCLK
+	输入：VSYNC（外部中断）
+
+
+
+SCCB通信口
+	SCL： PC4
+	SDA：PC5
+
+1. 在ov7670.c中void SCCB_Init(void)使能相应的IO端口
+2. 在ov7670.c中void SCCB_Init(void)设置相应端口为输出方式
