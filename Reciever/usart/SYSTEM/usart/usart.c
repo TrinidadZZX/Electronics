@@ -58,13 +58,17 @@ u8 USART2_RX_BUF[USART_REC_LEN];     //接收缓冲,最大USART_REC_LEN个字节.
 //bit13~0，	接收到的有效字节数目
 u16 USART2_RX_STA=0;       //接收状态标记	  
   
+extern u8 wakeUp;
+	
 void USART2_INIT(u32 bound){
   //GPIO端口设置
   GPIO_InitTypeDef GPIO_InitStructure;
 	USART_InitTypeDef USART_InitStructure;
 	NVIC_InitTypeDef NVIC_InitStructure;
 	
-	RCC_APB2PeriphClockCmd(RCC_APB1Periph_USART2|RCC_APB2Periph_GPIOA, ENABLE);	//使能USART1，GPIOA时钟
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
+	
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);	//使能USART1，GPIOA时钟
   
 	//USART2_TX   GPIOA.2
   GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2; //PA.2
@@ -112,12 +116,15 @@ void USART2_IRQHandler(void)                	//串口1中断服务程序
 		if((USART2_RX_STA&0x8000)==0)//接收未完成
 		{
 			if(USART2_RX_STA&0x4000)//接收到了0x0d
-				{
+			{
 				if(Res!=0x0a)USART2_RX_STA=0;//接收错误,重新开始
-				else USART2_RX_STA|=0x8000;	//接收完成了 
+				else{ 
+					USART2_RX_STA|=0x8000;	//接收完成了 
+					wakeUp=1;																//Transmitter已经可以发送数据
 				}
+			}
 			else //还没收到0X0D
-			{	
+			{
 				if(Res==0x0d)USART2_RX_STA|=0x4000;
 				else
 				{

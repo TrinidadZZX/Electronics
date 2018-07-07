@@ -7,7 +7,10 @@
 #endif
 //加入以下代码,支持printf函数,而不需要选择use MicroLIB	  
 #if 1
-#pragma import(__use_no_semihosting)             
+#pragma import(__use_no_semihosting) 
+
+extern u8 readyToSend;
+
 //标准库需要的支持函数                 
 struct __FILE 
 { 
@@ -119,10 +122,14 @@ void USART2_IRQHandler(void)                	//串口1中断服务程序
 		if((USART2_RX_STA&0x8000)==0)//接收未完成
 		{
 			if(USART2_RX_STA&0x4000)//接收到了0x0d
-				{
+			{
 				if(Res!=0x0a)USART2_RX_STA=0;//接收错误,重新开始
-				else USART2_RX_STA|=0x8000;	//接收完成了 
+				else
+				{ 
+					USART2_RX_STA|=0x8000;	//接收完成了 
+					readyToSend = 1;									//设置可以发送
 				}
+			}
 			else //还没收到0X0D
 			{	
 				if(Res==0x0d)USART2_RX_STA|=0x4000;

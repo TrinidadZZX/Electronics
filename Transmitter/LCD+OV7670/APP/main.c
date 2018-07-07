@@ -146,9 +146,11 @@ void camera_refresh(void)
     }
 }
 
+u8 readyToSend = 0;		//直到配对成功之后才可能成为1，这时候才能发送数据
 
 int main(void)
 {
+	
 	#ifdef USE_BLUETOOTH	
  	u16 t;  
 	u16 len;	
@@ -179,26 +181,20 @@ int main(void)
 
 		//蓝牙串口
 	#ifdef USE_BLUETOOTH	
- 	USART2_INIT(38400);	 //串口初始化为115200
+ 	USART2_INIT(38400);	 //串口初始化为38400
 	#endif
 
 	//delay_ms(5000);
   while(1)
   {
 		#ifdef USE_BLUETOOTH
-		camera_refresh();
-		
-		
-//		while(USART_GetFlagStatus(USART2,USART_FLAG_TC)==RESET);////循环发送,直到发送完毕   
-//    USART_SendData(USART2, 0x30);
-//		
-//		while(USART_GetFlagStatus(USART2,USART_FLAG_TC)==RESET);//循环发送,直到发送完毕   
-//    USART_SendData(USART2, 0x0d);
-//		
-//		while(USART_GetFlagStatus(USART2,USART_FLAG_TC)==RESET);//循环发送,直到发送完毕   
-//    USART_SendData(USART2, 0x0a);
-//		
-//		printf("\r\n");//插入换行
+		//camera_refresh();
+		double temp=100.123;
+		if(readyToSend){
+			printf("%f",temp);
+			printf("\r\n");//插入换行
+		}
+		delay_ms(1000);
 //		delay_ms(1000);
 		#endif
 
