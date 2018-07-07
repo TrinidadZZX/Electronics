@@ -179,26 +179,28 @@ int main(void)
 
 		//蓝牙串口
 	#ifdef USE_BLUETOOTH	
- 	USART2_INIT(115200);	 //串口初始化为115200
+ 	USART2_INIT(38400);	 //串口初始化为115200
 	#endif
 
+	//delay_ms(5000);
   while(1)
   {
-		//camera_refresh();
-			
-		if(USART2_RX_STA&0x8000)//接收完成
-		{					   
-			len=USART2_RX_STA&0x3fff;//得到此次接收到的数据长度
-			for(t=0;t<len;t++)
-			{
-				
-				LCD_ShowChar(0,len*5,BLUE, WHITE, USART2_RX_BUF[t],12,1);
-				//USART_SendData(USART2, USART2_RX_BUF[t]);//向串口1发送数据
-				//while(USART_GetFlagStatus(USART2,USART_FLAG_TC)!=SET);//等待发送结束
-			}
-			//printf("\r\n\r\n");//插入换行
-			USART2_RX_STA=0;
-		}
+		#ifdef USE_BLUETOOTH
+		camera_refresh();
+		
+		
+//		while(USART_GetFlagStatus(USART2,USART_FLAG_TC)==RESET);////循环发送,直到发送完毕   
+//    USART_SendData(USART2, 0x30);
+//		
+//		while(USART_GetFlagStatus(USART2,USART_FLAG_TC)==RESET);//循环发送,直到发送完毕   
+//    USART_SendData(USART2, 0x0d);
+//		
+//		while(USART_GetFlagStatus(USART2,USART_FLAG_TC)==RESET);//循环发送,直到发送完毕   
+//    USART_SendData(USART2, 0x0a);
+//		
+//		printf("\r\n");//插入换行
+//		delay_ms(1000);
+		#endif
 
 	}
 }

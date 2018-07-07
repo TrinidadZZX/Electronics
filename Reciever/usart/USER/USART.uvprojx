@@ -134,11 +134,11 @@
             <RunIndependent>0</RunIndependent>
             <UpdateFlashBeforeDebugging>1</UpdateFlashBeforeDebugging>
             <Capability>1</Capability>
-            <DriverSelection>4101</DriverSelection>
+            <DriverSelection>4100</DriverSelection>
           </Flash1>
           <bUseTDR>1</bUseTDR>
           <Flash2>Segger\JL2CM3.dll</Flash2>
-          <Flash3></Flash3>
+          <Flash3>"" ()</Flash3>
           <Flash4></Flash4>
           <pFcarmOut></pFcarmOut>
           <pFcarmGrp></pFcarmGrp>
@@ -337,7 +337,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F10X_HD,USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\HARDWARE\LED;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\USER;..\STM32F10x_FWLib\inc;..\CORE;..\HARDWARE\KEY</IncludePath>
+              <IncludePath>..\HARDWARE\LED;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\USER;..\STM32F10x_FWLib\inc;..\CORE;..\HARDWARE\KEY;..\SYSTEM\pid</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -430,6 +430,11 @@
               <FileName>usart.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\SYSTEM\usart\usart.c</FilePath>
+            </File>
+            <File>
+              <FileName>pid.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\SYSTEM\pid\pid.c</FilePath>
             </File>
           </Files>
         </Group>
