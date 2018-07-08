@@ -1,5 +1,5 @@
 #include "pid.h"
-#define ARR			1000			//计数值	10Hz
+#define ARR			10000			//计数值	10Hz
 #define PSC			7200			//预分频	10kHz
 typedef struct {
     float kp;
@@ -35,17 +35,17 @@ double t_update = 0.01;
 //小球实际坐标
 extern Locat ballLocat;
 //记录实际值的变化
-double x_real[3]; 		//x角度 测量量（弧度制）
-double y_real[3];	   	//y角度 测量量（弧度制）
+float x_real[3]; 		//x角度 测量量（弧度制）
+float y_real[3];	   	//y角度 测量量（弧度制）
 
-double x_err[3];	 		//角度 偏差量（弧度制）
-double y_err[3];	   	//角度 偏差量（弧度制）
+float x_err[3];	 		//角度 偏差量（弧度制）
+float y_err[3];	   	//角度 偏差量（弧度制）
 
-double x_I=0;			 			//角度error 积分值（弧度制）
-double y_I=0;			     	//角度error 积分值（弧度制）
+float x_I=0;			 			//角度error 积分值（弧度制）
+float y_I=0;			     	//角度error 积分值（弧度制）
 
-double x_D;		   				//角度  微分值（弧度制）
-double y_D;				 			//角度  微分值（弧度制）
+float x_D;		   				//角度  微分值（弧度制）
+float y_D;				 			//角度  微分值（弧度制）
 
 
 
@@ -59,15 +59,12 @@ void NewExpt(void)   //对 UpdateCtrl 函数给出的控制量进行补偿
 }
 
 
-void Clear_all_I(int max_I)
-{
-
-}
 
 
 void TIM2_PID_Init(void)  //PID TIM2 中断配置
 {
     //中断基础配置
+	float temp;
 
     TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
 
@@ -98,22 +95,24 @@ void TIM2_PID_Init(void)  //PID TIM2 中断配置
     t_update=(PSC+1)*(ARR+1)/72000000.0;
 
     // X
-    Inter_PID[X].kp=0.01;
-    Inter_PID[X].ki=0.05;
-    Inter_PID[X].kd=0.0006;
+    Inter_PID[X].kp=0.05;
+    Inter_PID[X].ki=0;
+    Inter_PID[X].kd=0;
 
 
     // Y
-    Inter_PID[Y].kp=0.012;
-    Inter_PID[Y].ki=0.055;
-    Inter_PID[Y].kd=0.001;
+    Inter_PID[Y].kp=0;
+    Inter_PID[Y].ki=0;
+    Inter_PID[Y].kd=0;
 
 }
 
 void TIM2_IRQHandler(void)        //计算各 PWM 增量
 {
     int i=0;
-		int angle_x, angle_y;
+	float temp;
+		static int delta_x, delta_y;//增量
+		static int angle_x, angle_y;//实际值
     TIM_ClearITPendingBit(TIM2,TIM_IT_Update);		 //清空TIM2溢出中断响应函数标志位
 
     //更新期望值
@@ -144,24 +143,30 @@ void TIM2_IRQHandler(void)        //计算各 PWM 增量
 
     //更新内环积分值 限幅？？？？？？？？？？？？
 
-    x_I += t_update*x_err[0];
+    //x_I += t_update*x_err[0];
     //if ((pitch_rate_I>20||pitch_rate_I<-20))
     //    pitch_rate_I = pitch_rate_I>20?20:-20;
 
 
-    y_I += t_update*y_err[0];
+    //y_I += t_update*y_err[0];
     //if ((roll_rate_I>20||roll_rate_I<-20))
     //    roll_rate_I = roll_rate_I>20?20:-20;
 
     //更新内环微分值：
-    x_D = (x_err[0]-x_err[1])/t_update;
-    y_D = (y_err[0]-y_err[1])/t_update;
+    //x_D = (x_err[0]-x_err[1])/t_update;
+    //y_D = (y_err[0]-y_err[1])/t_update;
 
 
     //解算各 PWM 增量
-		angle_x = Inter_PID[X].kp * x_err[0] + Inter_PID[X].ki * x_I + Inter_PID[X].kd * x_D;
-		angle_y = Inter_PID[Y].kp * y_err[0] + Inter_PID[Y].ki * y_I + Inter_PID[Y].kd * y_D;
 		
-    SpeedControl();
+		delta_x = (int)(Inter_PID[X].kp * x_err[0]);// + Inter_PID[X].ki * x_I + Inter_PID[X].kd * x_D;
+
+		Motor1(angle_x, angle_x+delta_x);
+		delta_y =(int)(Inter_PID[Y].kp * y_err[0]);// + Inter_PID[Y].ki * y_I + Inter_PID[Y].kd * y_D;
+		
+		Motor2(angle_y, angle_y+delta_y);
+		
+		angle_x+=delta_x;
+		angle_y+=delta_y;
 }
 

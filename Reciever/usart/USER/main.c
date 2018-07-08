@@ -1,8 +1,12 @@
 #include "led.h"
 #include "delay.h"
+#include "Timer.h"
+#include "pid.h"
 #include "key.h"
 #include "sys.h"
 #include "usart.h"
+#include "stdlib.h"
+#include "Motor.h"
 	/*
 	u8 USART2_RX_BUF[USART_REC_LEN];     //接收缓冲,最大USART_REC_LEN个字节.
 	//接收状态
@@ -32,11 +36,17 @@ extern u8 USART2_RX_BUF[USART_REC_LEN];     //接收缓冲,最大USART_REC_LEN个字节.
 //bit14，	接收到0x0d
 //bit13~0，	接收到的有效字节数目
 extern u16 USART2_RX_STA;       //接收状态标记	  
+
+
+u16 readHundrend(char *s);
+
+
+//TIM4 CH3:PB8
+//			CH4:PB9
 int main(void)
 {		
-	u8 temp=0;
-	
- 	u16 t;  
+	u8 readyForPID=0;
+	u8 notStartPID=1;
 	u16 len;	
 
 	
@@ -48,8 +58,13 @@ int main(void)
 
 
  	USART2_INIT(38400);	 //串口初始化为115200
+	
+	TIM4_Config();
 
-
+	//激光笔坐标
+	rayLocat.x = 200;
+	rayLocat.y = 120;
+	
  	while(1)
 	{
 		if(!wakeUp){
@@ -61,14 +76,23 @@ int main(void)
 				len=USART2_RX_STA&0x3fff;//得到此次接收到的数据长度
 				
 				//处理数据
-				
+				if(USART2_RX_BUF[0] == 'x' &&USART2_RX_BUF[6] == 'y'){//x轴坐标
+					ballLocat.x = readHundrend(USART2_RX_BUF+2);
+					ballLocat.y = readHundrend(USART2_RX_BUF+8);
+					readyForPID=1;
+				}
 				
 				USART2_RX_STA=0;				//Reset接收缓冲区
 			}
 		}
 		
+		if(readyForPID && notStartPID){
+			TIM2_PID_Init();
+			notStartPID=0;
+		}
+			
 		
-		delay_ms(1000);
+		delay_ms(200);
 	}	 
 }
 
@@ -79,4 +103,11 @@ void WakeUpUSART(void){
 		USART_SendData(USART2, 0x0d);
 		while(USART_GetFlagStatus(USART2,USART_FLAG_TC)==RESET);//循环发送,直到发送完毕   
 		USART_SendData(USART2, 0x0a);
+}
+
+
+u16 readHundrend(char *s){
+	u16 temp=0;
+	temp=((*s -0x30) * 100)+((*(s+1)-0x30) * 10)+(*(s+2)-0x30);
+	return temp;
 }

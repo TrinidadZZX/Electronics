@@ -2,6 +2,10 @@
 #define __PID_H
 
 #include "sys.h"
-void pid(u16 x, u16 y);
+#include "stm32f10x_tim.h"
+#include "Motor.h"
+void TIM2_PID_Init(void);
+void NewExpt(void);
+void TIM2_IRQHandler(void);
 
 #endif

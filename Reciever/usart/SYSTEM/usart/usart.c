@@ -83,8 +83,8 @@ void USART2_INIT(u32 bound){
 
   //Usart2 NVIC 配置
   NVIC_InitStructure.NVIC_IRQChannel = USART2_IRQn;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority=1 ;//抢占优先级3
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;		//子优先级3
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority=0 ;//抢占优先级3
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;		//子优先级3
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;			//IRQ通道使能
 	NVIC_Init(&NVIC_InitStructure);	//根据指定的参数初始化VIC寄存器
   
@@ -120,12 +120,16 @@ void USART2_IRQHandler(void)                	//串口1中断服务程序
 				if(Res!=0x0a)USART2_RX_STA=0;//接收错误,重新开始
 				else{ 
 					USART2_RX_STA|=0x8000;	//接收完成了 
+					
 					wakeUp=1;																//Transmitter已经可以发送数据
 				}
 			}
 			else //还没收到0X0D
 			{
-				if(Res==0x0d)USART2_RX_STA|=0x4000;
+				if(Res==0x0d){
+					USART2_RX_STA|=0x4000;
+					USART2_RX_BUF[USART2_RX_STA&0X3FFF]='\0';			//以\0作为结束符
+				}
 				else
 				{
 					USART2_RX_BUF[USART2_RX_STA&0X3FFF]=Res ;
