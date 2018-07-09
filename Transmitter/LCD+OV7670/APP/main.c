@@ -47,21 +47,21 @@ void camera_refresh(void)
 void camera_refresh(void)
 #endif
 {
+		//临时量
     u16 color=0;
     u32 j=0;
 		u8 temp;
 		
 	
-	
+		//统计值
 		int collector=0;
+	
+		//阈值
 		u16 r_threshold = 25 << 11;
 		u16 g_threshold = 55 << 5;
 		u16 b_threshold = 25;
 	
-		u8 continious_flag = 0;		//
-		u16 c_count = 0;					//collect 10 points to bingo
-		u16 x;
-		u16 y;
+		
 	
 	
 	
