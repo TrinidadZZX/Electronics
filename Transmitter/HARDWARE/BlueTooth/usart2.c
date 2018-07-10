@@ -1,5 +1,5 @@
 #include "sys.h"
-#include "usart.h"	  
+#include "usart2.h"	  
 ////////////////////////////////////////////////////////////////////////////////// 	 
 //如果使用ucos,则包括下面的头文件即可.
 #if SYSTEM_SUPPORT_OS
@@ -7,7 +7,9 @@
 #endif
 //加入以下代码,支持printf函数,而不需要选择use MicroLIB	  
 #if 1
-#pragma import(__use_no_semihosting)             
+#pragma import(__use_no_semihosting) 
+
+
 //标准库需要的支持函数                 
 struct __FILE 
 { 
@@ -38,7 +40,7 @@ int fputc(int ch, FILE *f)
 
 	while (USART_GetFlagStatus(USART1, USART_FLAG_TC) == RESET) {}	
    
-    return ch;
+  return ch;
 }
 int GetKey (void)  { 
 
@@ -58,15 +60,13 @@ u8 USART2_RX_BUF[USART_REC_LEN];     //接收缓冲,最大USART_REC_LEN个字节.
 //bit13~0，	接收到的有效字节数目
 u16 USART2_RX_STA=0;       //接收状态标记	  
   
-extern u8 wakeUp;
-extern	int recieve_count;
 void USART2_INIT(u32 bound){
   //GPIO端口设置
   GPIO_InitTypeDef GPIO_InitStructure;
 	USART_InitTypeDef USART_InitStructure;
 	NVIC_InitTypeDef NVIC_InitStructure;
 	
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);							//USART2特殊于USART1之处，留心于每一条函数！
 	
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);	//使能USART1，GPIOA时钟
   
@@ -81,12 +81,7 @@ void USART2_INIT(u32 bound){
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;//浮空输入
   GPIO_Init(GPIOA, &GPIO_InitStructure);//初始化GPIOA.10  
 
-  //Usart2 NVIC 配置
-  NVIC_InitStructure.NVIC_IRQChannel = USART2_IRQn;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority=0 ;//抢占优先级3
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;		//子优先级3
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;			//IRQ通道使能
-	NVIC_Init(&NVIC_InitStructure);	//根据指定的参数初始化VIC寄存器
+  
   
    //USART 初始化设置
 
@@ -97,10 +92,20 @@ void USART2_INIT(u32 bound){
 	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;//无硬件数据流控制
 	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;	//收发模式
 
+	USART_ClearFlag(USART2,USART_FLAG_TC);
   USART_Init(USART2, &USART_InitStructure); //初始化串口1
   USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);//开启串口接受中断
-  USART_Cmd(USART2, ENABLE);                    //使能串口1 
 
+
+	//Usart2 NVIC 配置
+  NVIC_InitStructure.NVIC_IRQChannel = USART2_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority=1 ;//抢占优先级3
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;		//子优先级3
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;			//IRQ通道使能
+	NVIC_Init(&NVIC_InitStructure);	//根据指定的参数初始化VIC寄存器
+	
+	
+  USART_Cmd(USART2, ENABLE);                    //使能串口1 
 }
 
 void USART2_IRQHandler(void)                	//串口1中断服务程序
@@ -118,17 +123,14 @@ void USART2_IRQHandler(void)                	//串口1中断服务程序
 			if(USART2_RX_STA&0x4000)//接收到了0x0d
 			{
 				if(Res!=0x0a)USART2_RX_STA=0;//接收错误,重新开始
-				else{ 
+				else
+				{ 
 					USART2_RX_STA|=0x8000;	//接收完成了 
-					recieve_count++;
 				}
 			}
 			else //还没收到0X0D
-			{
-				if(Res==0x0d){
-					USART2_RX_STA|=0x4000;
-					USART2_RX_BUF[USART2_RX_STA&0X3FFF]='\0';			//以\0作为结束符
-				}
+			{	
+				if(Res==0x0d)USART2_RX_STA|=0x4000;
 				else
 				{
 					USART2_RX_BUF[USART2_RX_STA&0X3FFF]=Res ;

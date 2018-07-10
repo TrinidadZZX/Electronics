@@ -7,7 +7,7 @@
 
   <Targets>
     <Target>
-      <TargetName>USART</TargetName>
+      <TargetName>OV7670</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
       <pCCUsed>5060750::V5.06 update 6 (build 750)::ARMCC</pCCUsed>
@@ -49,7 +49,7 @@
             <InvalidFlash>1</InvalidFlash>
           </TargetStatus>
           <OutputDirectory>..\OBJ\</OutputDirectory>
-          <OutputName>USART</OutputName>
+          <OutputName>OV7670</OutputName>
           <CreateExecutable>1</CreateExecutable>
           <CreateLib>0</CreateLib>
           <CreateHexFile>1</CreateHexFile>
@@ -134,11 +134,11 @@
             <RunIndependent>0</RunIndependent>
             <UpdateFlashBeforeDebugging>1</UpdateFlashBeforeDebugging>
             <Capability>1</Capability>
-            <DriverSelection>4100</DriverSelection>
+            <DriverSelection>4101</DriverSelection>
           </Flash1>
           <bUseTDR>1</bUseTDR>
           <Flash2>Segger\JL2CM3.dll</Flash2>
-          <Flash3>"" ()</Flash3>
+          <Flash3></Flash3>
           <Flash4></Flash4>
           <pFcarmOut></pFcarmOut>
           <pFcarmGrp></pFcarmGrp>
@@ -311,10 +311,10 @@
           </ArmAdsMisc>
           <Cads>
             <interw>1</interw>
-            <Optim>1</Optim>
+            <Optim>3</Optim>
             <oTime>0</oTime>
             <SplitLS>0</SplitLS>
-            <OneElfS>0</OneElfS>
+            <OneElfS>1</OneElfS>
             <Strict>0</Strict>
             <EnumInt>0</EnumInt>
             <PlainCh>0</PlainCh>
@@ -337,7 +337,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F10X_HD,USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\HARDWARE\LED;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\USER;..\STM32F10x_FWLib\inc;..\CORE;..\HARDWARE\KEY;..\SYSTEM\pid;..\HARDWARE\TIM4;..\HARDWARE\Motor;..\HARDWARE\Count</IncludePath>
+              <IncludePath>..\HARDWARE\LED;..\SYSTEM\delay;..\SYSTEM\sys;..\USER;..\STM32F10x_FWLib\inc;..\CORE;..\HARDWARE\OV7670;..\HARDWARE\EXTI;..\HARDWARE\Count;..\HARDWARE\LCD;..\HARDWARE\BlueTooth</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -402,29 +402,44 @@
           <GroupName>HARDWARE</GroupName>
           <Files>
             <File>
-              <FileName>led.c</FileName>
+              <FileName>exti.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\HARDWARE\LED\led.c</FilePath>
+              <FilePath>..\HARDWARE\EXTI\exti.c</FilePath>
             </File>
             <File>
-              <FileName>key.c</FileName>
+              <FileName>ov7670.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\HARDWARE\KEY\key.c</FilePath>
+              <FilePath>..\HARDWARE\OV7670\ov7670.c</FilePath>
             </File>
             <File>
-              <FileName>Timer.c</FileName>
+              <FileName>sccb.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\HARDWARE\TIM4\Timer.c</FilePath>
+              <FilePath>..\HARDWARE\OV7670\sccb.c</FilePath>
             </File>
             <File>
-              <FileName>Motor.c</FileName>
+              <FileName>tim2.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\HARDWARE\Motor\Motor.c</FilePath>
+              <FilePath>..\HARDWARE\Count\tim2.c</FilePath>
             </File>
             <File>
-              <FileName>tim3.c</FileName>
+              <FileName>lcd.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\HARDWARE\Count\tim3.c</FilePath>
+              <FilePath>..\HARDWARE\LCD\lcd.c</FilePath>
+            </File>
+            <File>
+              <FileName>GUI.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\LCD\GUI.c</FilePath>
+            </File>
+            <File>
+              <FileName>test.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\LCD\test.c</FilePath>
+            </File>
+            <File>
+              <FileName>usart2.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\BlueTooth\usart2.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -440,16 +455,6 @@
               <FileName>sys.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\SYSTEM\sys\sys.c</FilePath>
-            </File>
-            <File>
-              <FileName>usart.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\SYSTEM\usart\usart.c</FilePath>
-            </File>
-            <File>
-              <FileName>pid.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\SYSTEM\pid\pid.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -477,6 +482,11 @@
               <FilePath>..\STM32F10x_FWLib\src\misc.c</FilePath>
             </File>
             <File>
+              <FileName>stm32f10x_fsmc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\STM32F10x_FWLib\src\stm32f10x_fsmc.c</FilePath>
+            </File>
+            <File>
               <FileName>stm32f10x_gpio.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\STM32F10x_FWLib\src\stm32f10x_gpio.c</FilePath>
@@ -490,6 +500,11 @@
               <FileName>stm32f10x_usart.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\STM32F10x_FWLib\src\stm32f10x_usart.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f10x_exti.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\STM32F10x_FWLib\src\stm32f10x_exti.c</FilePath>
             </File>
             <File>
               <FileName>stm32f10x_tim.c</FileName>

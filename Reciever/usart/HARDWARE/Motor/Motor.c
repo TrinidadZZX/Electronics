@@ -1,13 +1,9 @@
 #include "Motor.h"
 #include "delay.h"
+#define restriction 30
 void Motor1(int angle1,int angle2){
 		int x1, x2;
 	int i;
-	
-	angle1 = angle1>30?30:angle1;
-	angle1 = angle1<-30?-30:angle1;
-	angle2 = angle2>30?30:angle2;
-	angle2 = angle2<-30?-30:angle2;
 
 	 x1=11*angle1+990                 ;                     // y=11x+990      -90-90   0---2000 
 		x2=11*angle2+990                 ;
@@ -31,11 +27,7 @@ void Motor2(int angle1,int angle2){
 	int x1, x2;
 	int i;
 	
-	angle1 = angle1>30?30:angle1;
-	angle1 = angle1<-30?-30:angle1;
-	angle2 = angle2>30?30:angle2;
-	angle2 = angle2<-30?-30:angle2;
-
+		
 	 x1=11*angle1+990                 ;                     // y=11x+990      -90-90   0---2000 
 		x2=11*angle2+990                 ;
 	if(angle1<angle2){

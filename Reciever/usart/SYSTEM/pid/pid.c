@@ -1,6 +1,9 @@
 #include "pid.h"
-#define ARR			10000			//计数值	10Hz
-#define PSC			7200			//预分频	10kHz
+#define ARR			1400			//计数值	10Hz
+#define PSC			3600			//预分频	10kHz
+#define restriction 20
+#define x_init	950
+#define y_init 1020
 typedef struct {
     float kp;
     float ki;
@@ -11,7 +14,7 @@ typedef struct{
 	u16 y;
 }Locat;
 
-
+extern int pid_count;
 PID Inter_PID[2];			//X,Y
 #define X 0
 #define Y	1
@@ -95,26 +98,26 @@ void TIM2_PID_Init(void)  //PID TIM2 中断配置
     t_update=(PSC+1)*(ARR+1)/72000000.0;
 
     // X
-    Inter_PID[X].kp=0.05;
+    Inter_PID[X].kp=0.2;//0.8
     Inter_PID[X].ki=0;
-    Inter_PID[X].kd=0;
+    Inter_PID[X].kd=1;//1
 
 
     // Y
-    Inter_PID[Y].kp=0;
+    Inter_PID[Y].kp=0.2;//0.8
     Inter_PID[Y].ki=0;
-    Inter_PID[Y].kd=0;
+    Inter_PID[Y].kd=1;
 
 }
-
+int angle_x=0 , angle_y=0;//实际值
 void TIM2_IRQHandler(void)        //计算各 PWM 增量
 {
     int i=0;
-	float temp;
+		float temp;
 		static int delta_x, delta_y;//增量
-		static int angle_x, angle_y;//实际值
+		
     TIM_ClearITPendingBit(TIM2,TIM_IT_Update);		 //清空TIM2溢出中断响应函数标志位
-
+		pid_count++;
     //更新期望值
     NewExpt();
 
@@ -127,8 +130,15 @@ void TIM2_IRQHandler(void)        //计算各 PWM 增量
         x_real[i]=x_real[i-1];
         y_real[i]=y_real[i-1];
     }
-    x_real[0]=ballLocat.x;
-    y_real[0]=ballLocat.y;      //角度180°补偿模块自动实现
+		if(ballLocat.x==0 && ballLocat.y==0){
+			TIM_SetCompare3(TIM4, x_init);
+			TIM_SetCompare4(TIM4, y_init);
+			return;
+		}
+		else{
+			x_real[0]=ballLocat.x;
+			y_real[0]=ballLocat.y;      //角度180°补偿模块自动实现
+		}
 
     //更新角度偏差向量
     for(i=2; i>0; i--)
@@ -159,14 +169,17 @@ void TIM2_IRQHandler(void)        //计算各 PWM 增量
 
     //解算各 PWM 增量
 		
-		delta_x = (int)(Inter_PID[X].kp * x_err[0]);// + Inter_PID[X].ki * x_I + Inter_PID[X].kd * x_D;
-
-		Motor1(angle_x, angle_x+delta_x);
-		delta_y =(int)(Inter_PID[Y].kp * y_err[0]);// + Inter_PID[Y].ki * y_I + Inter_PID[Y].kd * y_D;
+		angle_x =(int)(Inter_PID[X].kp * x_err[0] + Inter_PID[X].kd * (x_err[0] - x_err[1]));// + Inter_PID[X].ki * x_I + Inter_PID[X].kd * x_D;
 		
-		Motor2(angle_y, angle_y+delta_y);
+		angle_x= angle_x>restriction?restriction:angle_x;
+		angle_x = angle_x<-restriction?-restriction:angle_x;
+ // y=11x+990      -90-90   0---2000 
 		
-		angle_x+=delta_x;
-		angle_y+=delta_y;
+		TIM_SetCompare3(TIM4,11*angle_x+x_init);
+		angle_y =(int)(Inter_PID[Y].kp * y_err[0] + Inter_PID[Y].kd * (y_err[0] - y_err[1]));// + Inter_PID[X].ki * x_I + Inter_PID[X].kd * x_D;
+		
+		angle_y = angle_y>restriction?restriction:angle_y;
+		angle_y = angle_y<-restriction?-restriction:angle_y;
+		TIM_SetCompare4(TIM4, 11*angle_y+y_init);
 }
 
